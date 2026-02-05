@@ -2,7 +2,34 @@
 <html>
 <head>
 <title>NexMates</title>
-<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<style>
+body{
+font-family: Arial;
+text-align:center;
+background:#f4f6f8;
+}
+
+.container{
+margin-top:50px;
+}
+
+input{
+padding:10px;
+margin:5px;
+width:200px;
+}
+
+button{
+padding:10px 20px;
+margin:5px;
+}
+</style>
+
 </head>
 
 <body>
@@ -10,8 +37,104 @@
 <h1>NexMates</h1>
 <p>Find Your Circle</p>
 
-<button>Sign Up</button>
-<button>Login</button>
+<div class="container">
+
+<!-- Login -->
+<div id="loginSection">
+
+<h3>Login With Mobile</h3>
+
+<input type="text" id="phone" placeholder="+91XXXXXXXXXX">
+<br>
+
+<div id="recaptcha-container"></div>
+
+<button onclick="sendOTP()">Send OTP</button>
+
+<br>
+
+<input type="text" id="otp" placeholder="Enter OTP">
+<br>
+
+<button onclick="verifyOTP()">Verify OTP</button>
+
+</div>
+
+<!-- Profile -->
+<div id="profileSection" style="display:none">
+
+<h3>Create Profile</h3>
+
+<input type="text" id="name" placeholder="Your Name"><br>
+<input type="text" id="course" placeholder="Course"><br>
+<input type="text" id="interest" placeholder="Interest (Coding, Sports etc)"><br>
+
+<button onclick="saveProfile()">Save Profile</button>
+
+</div>
+
+</div>
+
+<script>
+
+// 🔥 PASTE YOUR FIREBASE CONFIG HERE
+const firebaseConfig = {
+apiKey: "YOUR_KEY",
+authDomain: "YOUR_DOMAIN",
+projectId: "YOUR_ID",
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+window.onload = function(){
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+}
+
+// SEND OTP
+function sendOTP(){
+
+let phone = document.getElementById("phone").value;
+
+auth.signInWithPhoneNumber(phone, window.recaptchaVerifier)
+.then(function(confirmationResult){
+window.confirmationResult = confirmationResult;
+alert("OTP Sent");
+});
+}
+
+// VERIFY OTP
+function verifyOTP(){
+
+let code = document.getElementById("otp").value;
+
+confirmationResult.confirm(code)
+.then(function(){
+
+document.getElementById("loginSection").style.display="none";
+document.getElementById("profileSection").style.display="block";
+
+});
+}
+
+// SAVE PROFILE
+function saveProfile(){
+
+let user = auth.currentUser;
+
+db.collection("users").doc(user.uid).set({
+
+name: document.getElementById("name").value,
+course: document.getElementById("course").value,
+interest: document.getElementById("interest").value
+
+});
+
+alert("Profile Saved!");
+}
+
+</script>
 
 </body>
 </html>
